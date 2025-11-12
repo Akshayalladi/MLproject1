@@ -1,6 +1,7 @@
 import sys
 from typing import Any
-import logging
+from src.logger import logging
+
 """
 Whenever we create an object of CustomException, Python first calls its __init__ method, which internally invokes super().__init__(error_message) to construct a standard Python Exception object using the inherited base class. This ensures that our custom exception behaves like any built-in error — it can be raised, caught, and logged. The constructor of Exception expects a basic error message, which we provide. Then, we enrich that error by calling a helper function that extracts traceback details like filename and line number, and we store this formatted message as an attribute (self.error_message) inside our custom object. Finally, we override the __str__() method so that printing the exception shows our enhanced message instead of the default one. In conclusion, CustomException creates a fully functional Python exception object with additional diagnostic configuration, making it more informative and traceable for debugging and automation workflows
 
@@ -20,4 +21,3 @@ class CustomException(Exception):
         
     def __str__(self):
         return self.error_message
-
