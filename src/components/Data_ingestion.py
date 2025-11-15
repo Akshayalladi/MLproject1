@@ -8,7 +8,8 @@ from sklearn.model_selection import train_test_split
 from src.components.Data_transformation import DataTransformation
 from src.exception import CustomException
 from src.logger import logging
-
+from src.components.model_trainer import ModelTrainer
+from src.components.model_trainer import modelTrainerConfig
 
 @dataclass
 class DataIngestionConfig:
@@ -51,5 +52,8 @@ if __name__ == "__main__":
     obj = DataIngestion()
     train_data_path, test_data_path = obj.initiate_data_ingestion()
     data_transformation = DataTransformation()
-    data_transformation.initiate_data_transformation(train_data_path, test_data_path)
+    train_array,test_array,_ = data_transformation.initiate_data_transformation(train_data_path, test_data_path)
+    model_trainer = ModelTrainer()
+    r2_square, best_model_name = model_trainer.initiate_model_trainer(train_array, test_array)
+    print(f"R2 square value: {r2_square}")
 
