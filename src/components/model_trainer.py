@@ -45,17 +45,58 @@ class ModelTrainer(modelTrainerConfig):
                 "AdaBoost Regressor": AdaBoostRegressor(),
             }
             
-            model_report: dict = evaluate_model(x_train=x_train,y_train = y_train, x_test= x_test,y_test= y_test, models= models)
-            print(model_report)
-            # To get the best model score from dict
-            best_model_score = max(sorted(model_report.values()))
-            best_model_name = list(model_report.keys())[
-                list(model_report.values()).index(best_model_score)
-            ]
+            param_grid = {
+                            "Random Forest": {
+                                'n_estimators': [100, 200],
+                                'max_depth': [None, 10, 20],
+                                'min_samples_split': [2, 5],
+                                'max_features': ['auto', 'sqrt']
+                            },
+                            "Decision Tree": {
+                                'max_depth': [None, 10, 20],
+                                'min_samples_split': [2, 5],
+                                'criterion': ['squared_error', 'friedman_mse']
+                            },
+                            "Gradient Boosting": {
+                                'n_estimators': [100, 200],
+                                'learning_rate': [0.01, 0.1],
+                                'max_depth': [3, 5],
+                                'subsample': [0.8, 1.0]
+                            },
+                            "Linear Regression": {
+                                'fit_intercept': [True, False]
+                                
+                            },
+                            "XGBRegressor": {
+                                'n_estimators': [100, 200],
+                                'learning_rate': [0.01, 0.1],
+                                'max_depth': [3, 5],
+                                'subsample': [0.8, 1.0],
+                                'colsample_bytree': [0.8, 1.0]
+                            },
+                            "CatBoosting Regressor": {
+                                'iterations': [100, 200],
+                                'learning_rate': [0.01, 0.1],
+                                'depth': [4, 6],
+                                'l2_leaf_reg': [1, 3]
+                            },
+                            "AdaBoost Regressor": {
+                                'n_estimators': [50, 100],
+                                'learning_rate': [0.01, 0.1, 1.0],
+                                'loss': ['linear', 'square', 'exponential']
+                            }
+                    }
+            model_report: dict = evaluate_model(x_train=x_train,y_train = y_train, x_test= x_test,y_test= y_test, models= models, param_grid= param_grid)
+           
+            
+            best_model_score = max([v.get('best_score', float('-inf')) for v in model_report.values()])
+          
+            best_model_name = max(model_report.items(), key=lambda item: item[1].get('best_score', float('-inf')))[0]
 
-            models_best = models[best_model_name]
+            # Use the trained best estimator from the report if available, otherwise fall back to the model in `models`
+            models_best = model_report[best_model_name].get('best_estimator', models.get(best_model_name))
             if best_model_score < 0.6:
-                raise CustomException(Exception("No best model found"), sys)
+                raise CustomException(f"No best model found", sys)
             
             logging.info(f"Best model found, Model Name: {best_model_name}, R2 Score: {best_model_score}")
 
@@ -70,4 +111,4 @@ class ModelTrainer(modelTrainerConfig):
             return r2_square,best_model_name
             
         except Exception as e:
-            raise CustomException(e,sys)
+            raise CustomException(f"Error occured while initiating model trainer {str(e)}",sys)

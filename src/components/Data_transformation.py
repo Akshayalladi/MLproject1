@@ -32,23 +32,22 @@ class DataTransformation(DataTransformationConfig):
             
             
             
-            num_pipeline = Pipeline(
-                steps = [
-                    ('Imputer',SimpleImputer(strategy='median')),
-                    ('Scalar', StandardScaler())
-                    ]
-            )
-            
-            cat_pipeline = Pipeline(
-                steps = [
-                ('Imputer',SimpleImputer(strategy = 'most_frequent')),
-                ('One_hot_encoder', OneHotEncoder()),
-                # OneHotEncoder produces a (by-default) sparse matrix; StandardScaler cannot center sparse input.
-                # Use with_mean=False so StandardScaler works with sparse data, or set OneHotEncoder(sparse_output=False)
-                ('scaler', StandardScaler(with_mean=False))
-                
+            num_pipeline= Pipeline(
+                steps=[
+                ("imputer",SimpleImputer(strategy="median")),
+                ("scaler",StandardScaler())
+
                 ]
-            
+            )
+
+            cat_pipeline=Pipeline(
+
+                steps=[
+                ("imputer",SimpleImputer(strategy="most_frequent")),
+                ("one_hot_encoder",OneHotEncoder()),
+                ("scaler",StandardScaler(with_mean=False))
+                ]
+
             )
 
             logging.info(f"Categorical columns: {categorical_columns}")
@@ -64,7 +63,7 @@ class DataTransformation(DataTransformationConfig):
             return preprocessor
             
         except Exception as e:
-            raise CustomException(e,sys)
+            raise CustomException(f"Error occured while creating processor creation with error message : {str(e)}",sys)
         
     def initiate_data_transformation(self, train_path, test_path):
         
@@ -114,6 +113,6 @@ class DataTransformation(DataTransformationConfig):
             )
         
         except Exception as e:
-            raise CustomException(e,sys)
+            raise CustomException(f"Error occured while data transformation with error message: {str(e)}",sys)
                     
         

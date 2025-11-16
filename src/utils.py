@@ -8,6 +8,7 @@ from src.exception import CustomException
 from src.logger import logging
 from typing import Dict, Any
 from sklearn.metrics import r2_score
+from sklearn.model_selection import GridSearchCV
 
 def save_object(file_path, obj):
     try:
@@ -19,21 +20,29 @@ def save_object(file_path, obj):
         logging.info(f'{file_path} saved successfully')
 
     except Exception as e:
-        raise CustomException(e,sys)
+        raise CustomException(f"Error while saving {file_path} with error message: {str(e)}",sys)
     
-def evaluate_model(x_train,y_train, x_test,y_test, models)-> Dict[str,Any]:
+def evaluate_model(x_train,y_train, x_test,y_test, models, param_grid)-> Dict[str,Any]:
     try:
         model_report = {}
         
-        for item in models.items():
-            model = item[1]
-            model.fit(x_train,y_train)
-            y_test_pred = model.predict(x_test)
-            y_train_pred = model.predict(x_train)
-            r2Scorevalue_train = r2_score(y_test,y_test_pred)
-            r2Scorevalue_test = r2_score(y_train,y_train_pred)
-            model_report[item[0]]= r2Scorevalue_test
+        for name ,model in models.items():
+            try:
+                print(f"Running GridSearchCV for {name}...")
+                clf = GridSearchCV(model, param_grid[name], cv=5, scoring='r2', n_jobs=-1)
+                clf.fit(x_train, y_train)
+
+                model_report[name] = {
+                    'ModelObject': clf.best_estimator_,
+                    'best_score': clf.best_score_,
+                    'best_params': clf.best_params_,
+                    'best_estimator': clf.best_estimator_
+                }
+            except Exception as e:
+                raise CustomException(f"Error occurred while tuning {name} with error message: {str(e)}",sys)
+                
 
         return model_report
+
     except Exception as e:
-        raise CustomException(e, sys)
+        raise CustomException(f"Error occurred while evaluateing Model with error message: {str(e)}", sys)

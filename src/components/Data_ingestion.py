@@ -45,7 +45,7 @@ class DataIngestion(DataIngestionConfig):
             )
 
         except Exception as e:
-            raise CustomException(e, sys)
+            raise CustomException(f"Error while initiating data ingestion with error message: {str(e)}", sys)
 
 
 if __name__ == "__main__":
