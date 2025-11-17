@@ -46,3 +46,12 @@ def evaluate_model(x_train,y_train, x_test,y_test, models, param_grid)-> Dict[st
 
     except Exception as e:
         raise CustomException(f"Error occurred while evaluateing Model with error message: {str(e)}", sys)
+
+def load_object(file_path):
+    try:
+        with open(file_path,'rb') as file:
+            return pickle.load(file)
+            
+    except Exception as e:
+        raise CustomException(f"Error while loading {file_path} with error: {str(e)}",sys)
+    
